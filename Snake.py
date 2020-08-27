@@ -49,19 +49,19 @@ class Snake:
         return self.is_alive
 
     def up(self):
-        if self.vel != [0, 1] or len(self.body) == 0:
+        if len(self.body) == 0 or self.cell_y != self.body[0].cell_y + 1:
             self.vel = [0, -1]
 
     def down(self):
-        if self.vel != [0, -1] or len(self.body) == 0:
+        if len(self.body) == 0 or self.cell_y != self.body[0].cell_y - 1:
             self.vel = [0, 1]
 
     def left(self):
-        if self.vel != [1, 0] or len(self.body) == 0:
+        if len(self.body) == 0 or self.cell_x != self.body[0].cell_x + 1:
             self.vel = [-1, 0]
 
     def right(self):
-        if self.vel != [-1, 0] or len(self.body) == 0:
+        if len(self.body) == 0 or self.cell_x != self.body[0].cell_x - 1:
             self.vel = [1, 0]
 
     def grow(self):

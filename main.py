@@ -1,9 +1,19 @@
 from graphics import *
 from Game import Game
 from pynput import keyboard
+from NeuralNetwork import NeuralNetwork
 
 
 def main():
+
+    net = NeuralNetwork(2, 2, 2, [2, 2])
+
+    inputs = [2, 2]
+
+    output = net.get_output(inputs)
+
+    print(output)
+
     fps = 10
     grid_size = 24
     cell_size = 32
