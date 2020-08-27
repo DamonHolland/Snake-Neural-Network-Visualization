@@ -4,10 +4,13 @@ from graphics import *
 
 
 class Neuron:
-    def __init__(self, bias, b_activation, b_output):
+    def __init__(self, bias, b_activation, b_output, b_drawn):
+        self.b_drawn = b_drawn
         self.bias = bias
         self.stored_value = 0
-        self.circle = None
+        if b_drawn:
+            self.circle = None
+            self.color = 'white'
         self.mid_point = None
         self.b_activation = b_activation
         self.b_output = b_output
@@ -22,13 +25,16 @@ class Neuron:
             output = 1 / (1 + math.exp(-output))
 
         # Edit the visuals if the Node has visuals
-        if self.circle is not None and not self.b_output:
+        if self.b_drawn and not self.b_output:
+            old_color = self.color
             if output >= 0.5:
-                self.circle.setFill('blue')
+                self.color = 'blue'
             elif output >= 0:
-                self.circle.setFill('aqua')
+                self.color = 'aqua'
             else:
-                self.circle.setFill('white')
+                self.color = 'white'
+            if self.color != old_color:
+                self.circle.setFill(self.color)
 
         return output
 

@@ -3,32 +3,33 @@ from Connection import Connection
 
 
 class NeuralNetwork:
-    def __init__(self, num_inputs, num_hidden_layers, num_outputs, neurons_in_hidden_layers):
+    def __init__(self, num_inputs, num_hidden_layers, num_outputs, neurons_in_hidden_layers, b_drawn):
         self.num_inputs = num_inputs
         self.num_hidden_layers = num_hidden_layers
         self.num_outputs = num_outputs
         self.neurons_in_hidden_layers = neurons_in_hidden_layers
+        self.b_drawn = b_drawn
 
         # ---------- Add all neurons to the network ----------
         self.network_neurons = []
         layer = []
         # Add input layers to network
         for i in range(num_inputs):
-            layer.append(Neuron(0.0, False, False))
+            layer.append(Neuron(0.0, False, False, self.b_drawn))
         self.network_neurons.append(layer)
 
         # Add hidden layers to network
         for i in range(num_hidden_layers):
             layer = []
             for j in range(neurons_in_hidden_layers[i]):
-                layer.append(Neuron(0.0, True, False))
+                layer.append(Neuron(0.0, True, False, self.b_drawn))
                 layer[j].randomize()
             self.network_neurons.append(layer)
 
         # Add output layers to network
         layer = []
         for i in range(num_outputs):
-            layer.append(Neuron(0.0, False, True))
+            layer.append(Neuron(0.0, False, True, self.b_drawn))
             layer[i].randomize()
         self.network_neurons.append(layer)
 
@@ -48,8 +49,8 @@ class NeuralNetwork:
         # Set the stored values of each Neuron by layer
         for i in range(len(self.network_connections)):
             self.network_connections[i].neuron2.stored_value = 0
-            self.network_connections[i].neuron2.stored_value += self.network_connections[i].neuron1.get_output() \
-                                                                * self.network_connections[i].weight
+            self.network_connections[i].neuron2.stored_value += self.network_connections[i].neuron1.get_output() * \
+                                                                self.network_connections[i].weight
 
         # Find the largest output value, and return its index
         largest_value = self.network_neurons[len(self.network_neurons) - 1][0].get_output()

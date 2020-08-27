@@ -12,16 +12,13 @@ class Snake:
         self.size = size
         self.rect = Rectangle(Point((self.cell_x * self.size), (self.cell_y * self.size) + self.size),
                               Point((self.cell_x * self.size) + self.size, (self.cell_y * self.size)))
+        self.rect.setFill('green')
+        self.rect.setOutline('green')
+        self.rect.draw(window)
         self.vel = [0, 0]
         self.body = []
         self.is_alive = True
-        self.draw()
         self.neural_net = neural_net
-
-    def draw(self):
-        self.rect.setFill('green')
-        self.rect.setOutline('green')
-        self.rect.draw(self.window)
 
     def update(self, apple):
         self.cell_x += self.vel[0]

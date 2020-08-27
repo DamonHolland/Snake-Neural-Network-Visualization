@@ -21,7 +21,7 @@ def main():
                          ((num_inputs * (neuron_size + neuron_padding_y)) + neuron_padding_y) + top_padding)
     window_nn.setBackground('black')
 
-    net = NeuralNetwork(num_inputs, num_hidden_layers, num_outputs, neurons_in_hidden_layers)
+    net = NeuralNetwork(num_inputs, num_hidden_layers, num_outputs, neurons_in_hidden_layers, True)
 
     net.draw_neurons(neuron_size, neuron_padding_x, neuron_padding_y, top_padding, window_nn)
     net.draw_connections(neuron_size, window_nn)
