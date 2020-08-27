@@ -1,6 +1,5 @@
 from graphics import *
-from Game import Game
-from NeuralNetwork import NeuralNetwork
+from Controller import Controller
 
 
 def main():
@@ -9,6 +8,7 @@ def main():
     num_hidden_layers = 2
     num_outputs = 4
     neurons_in_hidden_layers = [5, 5]
+    num_snakes = 5
 
     # Neural Network Visuals Configuration
     neuron_size = 64
@@ -16,17 +16,7 @@ def main():
     neuron_padding_y = 64
     top_padding = 128
 
-    window_nn = GraphWin("Neural Network",
-                         ((2 + num_hidden_layers) * (neuron_size + neuron_padding_x) + neuron_padding_x),
-                         ((num_inputs * (neuron_size + neuron_padding_y)) + neuron_padding_y) + top_padding)
-    window_nn.setBackground('black')
-
-    net = NeuralNetwork(num_inputs, num_hidden_layers, num_outputs, neurons_in_hidden_layers, True)
-
-    net.draw_neurons(neuron_size, neuron_padding_x, neuron_padding_y, top_padding, window_nn)
-    net.draw_connections(neuron_size, window_nn)
-    net.update_look()
-
+    # Performance Configuration
     fps = 10
     performance_sum = 0
     performance_check = 30
@@ -34,18 +24,24 @@ def main():
     grid_size = 24
     cell_size = 32
 
+    window_nn = GraphWin("Neural Network",
+                         ((2 + num_hidden_layers) * (neuron_size + neuron_padding_x) + neuron_padding_x),
+                         ((num_inputs * (neuron_size + neuron_padding_y)) + neuron_padding_y) + top_padding)
+    window_nn.setBackground('black')
+
     window = GraphWin("Snake", grid_size * cell_size, grid_size * cell_size)
     window.setBackground('black')
 
-    while window.isOpen():
-        is_running = True
-        game = Game(grid_size, cell_size, window, net)
+    while window.isOpen() and window_nn.isOpen():
+        controller = Controller(num_snakes, grid_size, cell_size, window, num_inputs, num_hidden_layers, num_outputs,
+                                neurons_in_hidden_layers, neuron_size, neuron_padding_x, neuron_padding_y,
+                                top_padding, window_nn)
 
-        while is_running:
+        while controller.simulation_running:
             last_frame_time = time.time()
 
             # Game Loop
-            is_running = game.update()
+            controller.update()
 
             # Performance Checks
             current_time = time.time()

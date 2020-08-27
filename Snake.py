@@ -3,27 +3,30 @@ from Body import Body
 
 
 class Snake:
-
     def __init__(self, x, y, size, grid_size, window, neural_net):
+        self.neural_net = neural_net
         self.window = window
         self.grid_size = grid_size
         self.cell_x = x
         self.cell_y = y
         self.size = size
-        self.rect = Rectangle(Point((self.cell_x * self.size), (self.cell_y * self.size) + self.size),
-                              Point((self.cell_x * self.size) + self.size, (self.cell_y * self.size)))
-        self.rect.setFill('green')
-        self.rect.setOutline('green')
-        self.rect.draw(window)
         self.vel = [0, 0]
         self.body = []
         self.is_alive = True
-        self.neural_net = neural_net
+        self.fitness = 0
+
+        if self.neural_net.b_drawn:
+            self.rect = Rectangle(Point((self.cell_x * self.size), (self.cell_y * self.size) + self.size),
+                                  Point((self.cell_x * self.size) + self.size, (self.cell_y * self.size)))
+            self.rect.setFill('green')
+            self.rect.setOutline('green')
+            self.rect.draw(window)
 
     def update(self, apple):
         self.cell_x += self.vel[0]
         self.cell_y += self.vel[1]
-        self.rect.move(self.vel[0] * self.size, self.vel[1] * self.size)
+        if self.neural_net.b_drawn:
+            self.rect.move(self.vel[0] * self.size, self.vel[1] * self.size)
 
         if self.cell_x == apple.cell_x and self.cell_y == apple.cell_y:
             apple.move(self)
@@ -32,7 +35,6 @@ class Snake:
         for i in range(len(self.body)):
             self.body[i].update()
             if self.cell_x == self.body[i].cell_x and self.cell_y == self.body[i].cell_y:
-                print("Final Score: " + str(len(self.body)))
                 self.is_alive = False
             if i == 0:
                 self.body[i].vel = [self.cell_x - self.body[i].cell_x, self.cell_y - self.body[i].cell_y]
@@ -41,8 +43,12 @@ class Snake:
                                     self.body[i - 1].cell_y - self.body[i].cell_y]
 
         if self.cell_x < 0 or self.cell_x >= self.grid_size or self.cell_y < 0 or self.cell_y >= self.grid_size:
-            print("Final Score: " + str(len(self.body)))
             self.is_alive = False
+
+        if not self.is_alive:
+            self.fitness = 1 + len(self.body) -\
+                           ((abs(self.cell_x - apple.cell_x) + abs(self.cell_y - apple.cell_y)) / self.grid_size)
+            print("Final Fitness: " + str(self.fitness))
 
         # --------------- Neural Network ---------------
 
@@ -54,7 +60,6 @@ class Snake:
         for i in range(len(self.body)):
             if self.cell_x == self.body[i].cell_x:
                 if self.cell_y < self.body[i].cell_y:
-                    print("Below Me")
                     if self.body[i].cell_y - self.cell_y < closest_down:
                         closest_down = self.body[i].cell_y - self.cell_y
                 else:
@@ -89,7 +94,8 @@ class Snake:
         output = self.neural_net.get_output([closest_up, closest_down, closest_left, closest_right,
                                              apple_diff_x, apple_diff_y])
 
-        self.neural_net.show_firing_neurons(output)
+        if self.neural_net.b_drawn:
+            self.neural_net.show_firing_neurons(output)
 
         if output == 0:
             self.up()

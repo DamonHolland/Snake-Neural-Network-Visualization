@@ -18,5 +18,4 @@ class Connection:
     def draw(self, size, window):
         self.line = Line(Point(self.neuron1.mid_point.x + size / 2, self.neuron1.mid_point.y),
                          Point(self.neuron2.mid_point.x - size / 2, self.neuron2.mid_point.y))
-        self.line.setFill('blue')
         self.line.draw(window)
