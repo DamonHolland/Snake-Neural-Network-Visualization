@@ -6,7 +6,7 @@ class Game:
     def __init__(self, grid_size, cell_size, window, neural_net):
         self.is_running = True
         self.snake = Snake(grid_size / 2, grid_size / 2, cell_size, grid_size, window, neural_net)
-        self.apple = Apple(grid_size, cell_size, window)
+        self.apple = Apple(grid_size, cell_size, window, neural_net.b_drawn)
 
     def update(self):
         self.is_running = self.snake.update(self.apple)

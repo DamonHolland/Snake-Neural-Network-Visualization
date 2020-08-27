@@ -14,6 +14,8 @@ class Snake:
         self.body = []
         self.is_alive = True
         self.fitness = 0
+        self.max_moves = 100
+        self.move_count = 0
 
         if self.neural_net.b_drawn:
             self.rect = Rectangle(Point((self.cell_x * self.size), (self.cell_y * self.size) + self.size),
@@ -23,6 +25,8 @@ class Snake:
             self.rect.draw(window)
 
     def update(self, apple):
+        self.move_count += 1
+
         self.cell_x += self.vel[0]
         self.cell_y += self.vel[1]
         if self.neural_net.b_drawn:
@@ -31,6 +35,7 @@ class Snake:
         if self.cell_x == apple.cell_x and self.cell_y == apple.cell_y:
             apple.move(self)
             self.grow()
+            self.move_count = 0
 
         for i in range(len(self.body)):
             self.body[i].update()
@@ -42,13 +47,13 @@ class Snake:
                 self.body[i].vel = [self.body[i - 1].cell_x - self.body[i].cell_x,
                                     self.body[i - 1].cell_y - self.body[i].cell_y]
 
-        if self.cell_x < 0 or self.cell_x >= self.grid_size or self.cell_y < 0 or self.cell_y >= self.grid_size:
+        if self.cell_x < 0 or self.cell_x >= self.grid_size or self.cell_y < 0 or self.cell_y >= self.grid_size\
+            or self.move_count > self.max_moves:
             self.is_alive = False
 
         if not self.is_alive:
             self.fitness = 1 + len(self.body) -\
                            ((abs(self.cell_x - apple.cell_x) + abs(self.cell_y - apple.cell_y)) / self.grid_size)
-            print("Final Fitness: " + str(self.fitness))
 
         # --------------- Neural Network ---------------
 
@@ -126,9 +131,10 @@ class Snake:
 
     def grow(self):
         if len(self.body) == 0:
-            new_body = Body(self.cell_x - self.vel[0], self.cell_y - self.vel[1], self.size, self.window)
+            new_body = Body(self.cell_x - self.vel[0], self.cell_y - self.vel[1], self.size, self.window,
+                            self.neural_net.b_drawn)
         else:
             new_body = Body(self.body[len(self.body) - 1].cell_x,
                             self.body[len(self.body) - 1].cell_y,
-                            self.size, self.window)
+                            self.size, self.window, self.neural_net.b_drawn)
         self.body.append(new_body)

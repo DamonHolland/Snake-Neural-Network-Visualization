@@ -8,7 +8,7 @@ def main():
     num_hidden_layers = 2
     num_outputs = 4
     neurons_in_hidden_layers = [5, 5]
-    num_snakes = 5
+    num_snakes = 100
 
     # Neural Network Visuals Configuration
     neuron_size = 64
@@ -26,7 +26,8 @@ def main():
 
     window_nn = GraphWin("Neural Network",
                          ((2 + num_hidden_layers) * (neuron_size + neuron_padding_x) + neuron_padding_x),
-                         ((num_inputs * (neuron_size + neuron_padding_y)) + neuron_padding_y) + top_padding)
+                         ((num_inputs * (neuron_size + neuron_padding_y)) + neuron_padding_y) + top_padding,
+                         autoflush=False)
     window_nn.setBackground('black')
 
     window = GraphWin("Snake", grid_size * cell_size, grid_size * cell_size)
@@ -55,9 +56,6 @@ def main():
                 print("Performance: " + str(performance_sum / performance_check))
                 performance_counter = 0
                 performance_sum = 0
-
-        for item in window.items[:]:
-            item.undraw()
 
     return 0
 

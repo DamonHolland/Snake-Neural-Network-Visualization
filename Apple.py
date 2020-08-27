@@ -4,15 +4,17 @@ from graphics import *
 
 class Apple:
 
-    def __init__(self, grid_size, cell_size, window):
+    def __init__(self, grid_size, cell_size, window, b_drawn):
+        self.b_drawn = b_drawn
         self.grid_size = grid_size
         self.size = cell_size
         self.cell_x = random.randint(0, grid_size - 1)
         self.cell_y = random.randint(0, grid_size - 1)
-        self.circle = Circle(Point((self.cell_x * self.size) + self.size / 2,
-                                   (self.cell_y * self.size) + self.size / 2), self.size / 2)
-        self.circle.setFill('red')
-        self.circle.draw(window)
+        if self.b_drawn:
+            self.circle = Circle(Point((self.cell_x * self.size) + self.size / 2,
+                                (self.cell_y * self.size) + self.size / 2), self.size / 2)
+            self.circle.setFill('red')
+            self.circle.draw(window)
 
     def move(self, snake):
         position_found = False
@@ -31,6 +33,7 @@ class Apple:
             if not position_taken:
                 position_found = True
 
-        self.circle.move((new_x - self.cell_x) * self.size, (new_y - self.cell_y) * self.size)
-        self.cell_x = new_x
-        self.cell_y = new_y
+        if self.b_drawn:
+            self.circle.move((new_x - self.cell_x) * self.size, (new_y - self.cell_y) * self.size)
+            self.cell_x = new_x
+            self.cell_y = new_y
