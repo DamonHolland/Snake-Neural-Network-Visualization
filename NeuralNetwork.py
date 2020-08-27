@@ -35,10 +35,10 @@ class NeuralNetwork:
         # ---------- Add all connections to the network ----------
         self.network_connections = []
         for i in range(len(self.network_neurons) - 1):
-            layer = []
             for j in range(len(self.network_neurons[i])):
                 for k in range(len(self.network_neurons[i + 1])):
-                    layer.append(Connection(self.network_neurons[i][j], self.network_neurons[i + 1][k]))
+                    self.network_connections.append(Connection(self.network_neurons[i][j],
+                                                               self.network_neurons[i + 1][k]))
 
     def get_output(self, inputs):
         # Set the input neuron values according to given input
@@ -59,3 +59,17 @@ class NeuralNetwork:
                 largest_index = i
 
         return largest_index
+
+    def draw_neurons(self, size, padding_x, padding_y, margin, window):
+        for i in range(len(self.network_neurons)):
+            for j in range(len(self.network_neurons[i])):
+                self.network_neurons[i][j].draw(i, j, size, padding_x, padding_y, margin, window,
+                                                len(self.network_neurons[i]), self.num_inputs)
+
+    def draw_connections(self, size, window):
+        for i in range(len(self.network_connections)):
+            self.network_connections[i].draw(size, window)
+
+    def update_look(self):
+        for i in range(len(self.network_connections)):
+            self.network_connections[i].update_look()

@@ -5,14 +5,32 @@ from NeuralNetwork import NeuralNetwork
 
 
 def main():
+    # Neural Network Configuration
+    num_inputs = 6
+    num_hidden_layers = 2
+    num_outputs = 4
+    neurons_in_hidden_layers = [5, 5]
 
-    net = NeuralNetwork(2, 2, 2, [2, 2])
+    # Neural Network Visuals Configuration
+    neuron_size = 64
+    neuron_padding_x = 160
+    neuron_padding_y = 64
+    top_padding = 128
 
-    inputs = [2, 2]
+    window_nn = GraphWin("Neural Network",
+                         ((2 + num_hidden_layers) * (neuron_size + neuron_padding_x) + neuron_padding_x),
+                         ((num_inputs * (neuron_size + neuron_padding_y)) + neuron_padding_y) + top_padding)
+    window_nn.setBackground('black')
 
-    output = net.get_output(inputs)
+    net = NeuralNetwork(num_inputs, num_hidden_layers, num_outputs, neurons_in_hidden_layers)
 
-    print(output)
+    inputs = [2, 2, 2, 2, 2, 2]
+
+    net.get_output(inputs)
+
+    net.draw_neurons(neuron_size, neuron_padding_x, neuron_padding_y, top_padding, window_nn)
+    net.draw_connections(neuron_size, window_nn)
+    net.update_look()
 
     fps = 10
     grid_size = 24
@@ -39,6 +57,8 @@ def main():
 
         for item in window.items[:]:
             item.undraw()
+
+    return 0
 
 
 main()
