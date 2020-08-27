@@ -92,13 +92,15 @@ class Snake:
         output = self.neural_net.get_output([closest_up, closest_down, closest_left, closest_right,
                                              apple_diff_x, apple_diff_y])
 
-        if output == 1:
+        self.neural_net.show_firing_neurons(output)
+
+        if output == 0:
             self.up()
-        elif output == 2:
+        elif output == 1:
             self.down()
-        elif output == 3:
+        elif output == 2:
             self.left()
-        elif output == 4:
+        elif output == 3:
             self.right()
 
         return self.is_alive

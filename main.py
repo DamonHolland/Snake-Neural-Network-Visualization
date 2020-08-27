@@ -28,6 +28,9 @@ def main():
     net.update_look()
 
     fps = 10
+    performance_sum = 0
+    performance_check = 30
+    performance_counter = 0
     grid_size = 24
     cell_size = 32
 
@@ -41,12 +44,21 @@ def main():
         while is_running:
             last_frame_time = time.time()
 
+            # Game Loop
             is_running = game.update()
 
+            # Performance Checks
             current_time = time.time()
             sleep_time = 1.0 / fps - (current_time - last_frame_time)
             if sleep_time > 0:
                 time.sleep(sleep_time)
+
+            performance_counter += 1
+            performance_sum += ((1.0 / fps) - sleep_time) / (1.0 / fps)
+            if performance_counter == performance_check:
+                print("Performance: " + str(performance_sum / performance_check))
+                performance_counter = 0
+                performance_sum = 0
 
         for item in window.items[:]:
             item.undraw()

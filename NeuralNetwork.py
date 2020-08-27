@@ -14,21 +14,21 @@ class NeuralNetwork:
         layer = []
         # Add input layers to network
         for i in range(num_inputs):
-            layer.append(Neuron(0.0))
+            layer.append(Neuron(0.0, False, False))
         self.network_neurons.append(layer)
 
         # Add hidden layers to network
         for i in range(num_hidden_layers):
             layer = []
             for j in range(neurons_in_hidden_layers[i]):
-                layer.append(Neuron(0.0))
+                layer.append(Neuron(0.0, True, False))
                 layer[j].randomize()
             self.network_neurons.append(layer)
 
         # Add output layers to network
         layer = []
         for i in range(num_outputs):
-            layer.append(Neuron(0.0))
+            layer.append(Neuron(0.0, False, True))
             layer[i].randomize()
         self.network_neurons.append(layer)
 
@@ -47,8 +47,9 @@ class NeuralNetwork:
 
         # Set the stored values of each Neuron by layer
         for i in range(len(self.network_connections)):
-            self.network_connections[i].neuron2.stored_value += self.network_connections[i].neuron1.get_output() * \
-                                                                self.network_connections[i].weight
+            self.network_connections[i].neuron2.stored_value = 0
+            self.network_connections[i].neuron2.stored_value += self.network_connections[i].neuron1.get_output() \
+                                                                * self.network_connections[i].weight
 
         # Find the largest output value, and return its index
         largest_value = self.network_neurons[len(self.network_neurons) - 1][0].get_output()
@@ -69,6 +70,13 @@ class NeuralNetwork:
     def draw_connections(self, size, window):
         for i in range(len(self.network_connections)):
             self.network_connections[i].draw(size, window)
+
+    def show_firing_neurons(self, firing_neuron):
+        for i in range(len(self.network_neurons[len(self.network_neurons) - 1])):
+            if i == firing_neuron:
+                self.network_neurons[len(self.network_neurons) - 1][i].look_fire()
+            else:
+                self.network_neurons[len(self.network_neurons) - 1][i].look_dormant()
 
     def update_look(self):
         for i in range(len(self.network_connections)):
