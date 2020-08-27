@@ -4,7 +4,7 @@ from Body import Body
 
 class Snake:
 
-    def __init__(self, x, y, size, grid_size, window):
+    def __init__(self, x, y, size, grid_size, window, neural_net):
         self.window = window
         self.grid_size = grid_size
         self.cell_x = x
@@ -16,6 +16,7 @@ class Snake:
         self.body = []
         self.is_alive = True
         self.draw()
+        self.neural_net = neural_net
 
     def draw(self):
         self.rect.setFill('green')
@@ -45,6 +46,60 @@ class Snake:
         if self.cell_x < 0 or self.cell_x >= self.grid_size or self.cell_y < 0 or self.cell_y >= self.grid_size:
             print("Final Score: " + str(len(self.body)))
             self.is_alive = False
+
+        # --------------- Neural Network ---------------
+
+        # Find The closest cells in each direction / Normalize Input
+        closest_up = self.grid_size
+        closest_down = self.grid_size
+        closest_left = self.grid_size
+        closest_right = self.grid_size
+        for i in range(len(self.body)):
+            if self.cell_x == self.body[i].cell_x:
+                if self.cell_y < self.body[i].cell_y:
+                    print("Below Me")
+                    if self.body[i].cell_y - self.cell_y < closest_down:
+                        closest_down = self.body[i].cell_y - self.cell_y
+                else:
+                    if self.cell_y - self.body[i].cell_y < closest_up:
+                        closest_up = self.cell_y - self.body[i].cell_y
+            elif self.cell_y == self.body[i].cell_y:
+                if self.cell_x > self.body[i].cell_x:
+                    if self.cell_x - self.body[i].cell_x < closest_left:
+                        closest_left = self.cell_x - self.body[i].cell_x
+                else:
+                    if self.body[i].cell_x - self.cell_x < closest_right:
+                        closest_right = self.body[i].cell_x - self.cell_x
+        if closest_up == self.grid_size:
+            closest_up = self.cell_y
+        if closest_down == self.grid_size:
+            closest_down = self.grid_size - self.cell_y
+        if closest_right == self.grid_size:
+            closest_right = self.grid_size - self.cell_x
+        if closest_left == self.grid_size:
+            closest_left = self.cell_x
+        closest_up = (closest_up - (self.grid_size / 2)) / (self.grid_size / 2)
+        closest_down = (closest_down - (self.grid_size / 2)) / (self.grid_size / 2)
+        closest_left = (closest_left - (self.grid_size / 2)) / (self.grid_size / 2)
+        closest_right = (closest_right - (self.grid_size / 2)) / (self.grid_size / 2)
+
+        # Find The x and y distance to the apple, Normalize input
+        apple_diff_x = abs(self.cell_x - apple.cell_x)
+        apple_diff_y = abs(self.cell_y - apple.cell_y)
+        apple_diff_x = (apple_diff_x - (self.grid_size / 2)) / (self.grid_size / 2)
+        apple_diff_y = (apple_diff_y - (self.grid_size / 2)) / (self.grid_size / 2)
+
+        output = self.neural_net.get_output([closest_up, closest_down, closest_left, closest_right,
+                                             apple_diff_x, apple_diff_y])
+
+        if output == 1:
+            self.up()
+        elif output == 2:
+            self.down()
+        elif output == 3:
+            self.left()
+        elif output == 4:
+            self.right()
 
         return self.is_alive
 

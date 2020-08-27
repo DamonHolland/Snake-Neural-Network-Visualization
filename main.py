@@ -1,6 +1,5 @@
 from graphics import *
 from Game import Game
-from pynput import keyboard
 from NeuralNetwork import NeuralNetwork
 
 
@@ -24,10 +23,6 @@ def main():
 
     net = NeuralNetwork(num_inputs, num_hidden_layers, num_outputs, neurons_in_hidden_layers)
 
-    inputs = [2, 2, 2, 2, 2, 2]
-
-    net.get_output(inputs)
-
     net.draw_neurons(neuron_size, neuron_padding_x, neuron_padding_y, top_padding, window_nn)
     net.draw_connections(neuron_size, window_nn)
     net.update_look()
@@ -41,9 +36,7 @@ def main():
 
     while window.isOpen():
         is_running = True
-        game = Game(grid_size, cell_size, window)
-        listener = keyboard.Listener(on_press=game.on_press, on_release=0)
-        listener.start()
+        game = Game(grid_size, cell_size, window, net)
 
         while is_running:
             last_frame_time = time.time()
