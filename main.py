@@ -8,7 +8,7 @@ def main():
     num_hidden_layers = 2
     num_outputs = 4
     neurons_in_hidden_layers = [5, 5]
-    num_snakes = 100
+    num_snakes = 400
 
     # Neural Network Visuals Configuration
     neuron_size = 64

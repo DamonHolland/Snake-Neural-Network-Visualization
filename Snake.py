@@ -1,19 +1,19 @@
 from graphics import *
 from Body import Body
+import random
 
 
 class Snake:
-    def __init__(self, x, y, size, grid_size, window, neural_net):
+    def __init__(self, size, grid_size, window, neural_net):
         self.neural_net = neural_net
         self.window = window
         self.grid_size = grid_size
-        self.cell_x = x
-        self.cell_y = y
+        self.cell_x = random.randint(0, grid_size - 1)
+        self.cell_y = random.randint(0, grid_size - 1)
         self.size = size
         self.vel = [0, 0]
         self.body = []
         self.is_alive = True
-        self.fitness = 0
         self.max_moves = 100
         self.move_count = 0
 
@@ -52,8 +52,10 @@ class Snake:
             self.is_alive = False
 
         if not self.is_alive:
-            self.fitness = 1 + len(self.body) -\
-                           ((abs(self.cell_x - apple.cell_x) + abs(self.cell_y - apple.cell_y)) / self.grid_size)
+            self.neural_net.fitness = 1 + (len(self.body) * 100) -\
+                                      (self.grid_size - (abs(self.cell_x - apple.cell_x) +
+                                                         abs(self.cell_y - apple.cell_y))) +\
+                                      (self.move_count / self.max_moves)
 
         # --------------- Neural Network ---------------
 

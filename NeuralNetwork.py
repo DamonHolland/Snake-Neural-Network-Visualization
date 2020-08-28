@@ -1,5 +1,6 @@
 from Neuron import Neuron
 from Connection import Connection
+import random
 
 
 class NeuralNetwork:
@@ -9,6 +10,7 @@ class NeuralNetwork:
         self.num_outputs = num_outputs
         self.neurons_in_hidden_layers = neurons_in_hidden_layers
         self.b_drawn = b_drawn
+        self.fitness = 0
 
         # ---------- Add all neurons to the network ----------
         self.network_neurons = []
@@ -82,3 +84,31 @@ class NeuralNetwork:
     def update_look(self):
         for i in range(len(self.network_connections)):
             self.network_connections[i].update_look()
+
+    def crossover(self, net1, net2):
+        for i in range(len(self.network_neurons)):
+            for j in range(len(self.network_neurons[i])):
+                rand = random.randint(0, 1)
+                if rand == 0:
+                    self.network_neurons[i][j].bias = net1.network_neurons[i][j].bias
+                else:
+                    self.network_neurons[i][j].bias = net2.network_neurons[i][j].bias
+
+        for i in range(len(self.network_connections)):
+                rand = random.randint(0, 1)
+                if rand == 0:
+                    self.network_connections[i].weight = net1.network_connections[i].weight
+                else:
+                    self.network_connections[i].weight = net2.network_connections[i].weight
+
+    def mutate(self, rate):
+        for i in range(len(self.network_neurons)):
+            for j in range(len(self.network_neurons[i])):
+                rand = random.randint(0, rate)
+                if rand % rate == 0:
+                    self.network_neurons[i][j].randomize()
+
+        for i in range(len(self.network_connections)):
+            rand = random.randint(0, rate)
+            if rand % rate == 0:
+                self.network_connections[i].randomize()

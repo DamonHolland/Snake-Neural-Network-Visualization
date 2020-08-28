@@ -15,6 +15,9 @@ class Connection:
         else:
             self.line.setFill('red')
 
+    def randomize(self):
+        self.weight = random.randint(-100, 100) / 100.0
+
     def draw(self, size, window):
         self.line = Line(Point(self.neuron1.mid_point.x + size / 2, self.neuron1.mid_point.y),
                          Point(self.neuron2.mid_point.x - size / 2, self.neuron2.mid_point.y))
