@@ -16,6 +16,7 @@ class Snake:
         self.is_alive = True
         self.max_moves = 100
         self.move_count = 0
+        self.fitness = 0
 
         if self.neural_net.b_drawn:
             self.rect = Rectangle(Point((self.cell_x * self.size), (self.cell_y * self.size) + self.size),
@@ -27,6 +28,16 @@ class Snake:
     def update(self, apple):
         self.move_count += 1
 
+        if abs(self.cell_x + self.vel[0] - apple.cell_x) < abs(self.cell_x - apple.cell_x):
+            self.fitness += 10
+        elif abs(self.cell_x + self.vel[0] - apple.cell_x) > abs(self.cell_x - apple.cell_x):
+            self.fitness -= 0
+
+        if abs(self.cell_y + self.vel[1] - apple.cell_y) < abs(self.cell_y - apple.cell_y):
+            self.fitness += 10
+        elif abs(self.cell_y + self.vel[1] - apple.cell_y) > abs(self.cell_y - apple.cell_y):
+            self.fitness -= 0
+
         self.cell_x += self.vel[0]
         self.cell_y += self.vel[1]
         if self.neural_net.b_drawn:
@@ -35,6 +46,7 @@ class Snake:
         if self.cell_x == apple.cell_x and self.cell_y == apple.cell_y:
             apple.move(self)
             self.grow()
+            self.fitness += 50 * len(self.body)
             self.move_count = 0
 
         for i in range(len(self.body)):
@@ -47,59 +59,70 @@ class Snake:
                 self.body[i].vel = [self.body[i - 1].cell_x - self.body[i].cell_x,
                                     self.body[i - 1].cell_y - self.body[i].cell_y]
 
-        if self.cell_x < 0 or self.cell_x >= self.grid_size or self.cell_y < 0 or self.cell_y >= self.grid_size\
-            or self.move_count > self.max_moves:
+        if self.cell_x < 0 or self.cell_x >= self.grid_size or self.cell_y < 0 or self.cell_y >= self.grid_size:
             self.is_alive = False
 
-        if not self.is_alive:
-            self.neural_net.fitness = 1 + (len(self.body) * 100) -\
-                                      (self.grid_size - (abs(self.cell_x - apple.cell_x) +
-                                                         abs(self.cell_y - apple.cell_y))) +\
-                                      (self.move_count / self.max_moves)
+        if self.move_count > self.max_moves:
+            self.is_alive = False
 
         # --------------- Neural Network ---------------
 
-        # Find The closest cells in each direction / Normalize Input
-        closest_up = self.grid_size
-        closest_down = self.grid_size
-        closest_left = self.grid_size
-        closest_right = self.grid_size
+        # Fitness Function
+        if not self.is_alive:
+            self.neural_net.fitness = self.fitness
+
+        # Find The distances in each direction to the closest body cell
+        closest_body_up = closest_body_down = closest_body_left = closest_body_right = self.grid_size
         for i in range(len(self.body)):
             if self.cell_x == self.body[i].cell_x:
                 if self.cell_y < self.body[i].cell_y:
-                    if self.body[i].cell_y - self.cell_y < closest_down:
-                        closest_down = self.body[i].cell_y - self.cell_y
+                    if self.body[i].cell_y - self.cell_y < closest_body_down:
+                        closest_body_down = self.body[i].cell_y - self.cell_y
                 else:
-                    if self.cell_y - self.body[i].cell_y < closest_up:
-                        closest_up = self.cell_y - self.body[i].cell_y
+                    if self.cell_y - self.body[i].cell_y < closest_body_up:
+                        closest_body_up = self.cell_y - self.body[i].cell_y
             elif self.cell_y == self.body[i].cell_y:
                 if self.cell_x > self.body[i].cell_x:
-                    if self.cell_x - self.body[i].cell_x < closest_left:
-                        closest_left = self.cell_x - self.body[i].cell_x
+                    if self.cell_x - self.body[i].cell_x < closest_body_left:
+                        closest_body_left = self.cell_x - self.body[i].cell_x
                 else:
-                    if self.body[i].cell_x - self.cell_x < closest_right:
-                        closest_right = self.body[i].cell_x - self.cell_x
-        if closest_up == self.grid_size:
-            closest_up = self.cell_y
-        if closest_down == self.grid_size:
-            closest_down = self.grid_size - self.cell_y
-        if closest_right == self.grid_size:
-            closest_right = self.grid_size - self.cell_x
-        if closest_left == self.grid_size:
-            closest_left = self.cell_x
-        closest_up = (closest_up - (self.grid_size / 2)) / (self.grid_size / 2)
-        closest_down = (closest_down - (self.grid_size / 2)) / (self.grid_size / 2)
-        closest_left = (closest_left - (self.grid_size / 2)) / (self.grid_size / 2)
-        closest_right = (closest_right - (self.grid_size / 2)) / (self.grid_size / 2)
+                    if self.body[i].cell_x - self.cell_x < closest_body_right:
+                        closest_body_right = self.body[i].cell_x - self.cell_x
 
-        # Find The x and y distance to the apple, Normalize input
-        apple_diff_x = abs(self.cell_x - apple.cell_x)
-        apple_diff_y = abs(self.cell_y - apple.cell_y)
-        apple_diff_x = (apple_diff_x - (self.grid_size / 2)) / (self.grid_size / 2)
-        apple_diff_y = (apple_diff_y - (self.grid_size / 2)) / (self.grid_size / 2)
+        # Find distances in each direction to the wall
+        closest_wall_up = self.cell_y
+        closest_wall_down = self.grid_size - self.cell_y
+        closest_wall_left = self.cell_x
+        closest_wall_right = self.grid_size - self.cell_x
 
-        output = self.neural_net.get_output([closest_up, closest_down, closest_left, closest_right,
-                                             apple_diff_x, apple_diff_y])
+        # Find distances in each direction to the apple
+        closest_apple_up = closest_apple_down = closest_apple_left = closest_apple_right = self.grid_size
+
+        if self.cell_x == apple.cell_x:
+            if self.cell_y < apple.cell_y:
+                if apple.cell_y - self.cell_y < closest_apple_down:
+                    closest_apple_down = apple.cell_y - self.cell_y
+            else:
+                if self.cell_y - apple.cell_y < closest_apple_up:
+                    closest_apple_up = self.cell_y - apple.cell_y
+        elif self.cell_y == apple.cell_y:
+            if self.cell_x > apple.cell_x:
+                if self.cell_x - apple.cell_x < closest_apple_left:
+                    closest_apple_left = self.cell_x - apple.cell_x
+            else:
+                if apple.cell_x - self.cell_x < closest_apple_right:
+                    closest_apple_right = apple.cell_x - self.cell_x
+
+        # Normalize inputs
+        inputs = [closest_wall_up, closest_wall_down, closest_wall_left, closest_wall_right,
+                  closest_body_up, closest_body_down, closest_body_left, closest_body_right,
+                  closest_apple_up, closest_apple_down, closest_apple_left, closest_apple_right]
+
+        for i in range(len(inputs)):
+            inputs[i] = (inputs[i] - (self.grid_size / 2)) / (self.grid_size / 2)
+            inputs[i] = 0 - inputs[i]
+
+        output = self.neural_net.get_output(inputs)
 
         if self.neural_net.b_drawn:
             self.neural_net.show_firing_neurons(output)

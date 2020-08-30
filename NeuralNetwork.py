@@ -1,6 +1,7 @@
 from Neuron import Neuron
 from Connection import Connection
 import random
+import copy
 
 
 class NeuralNetwork:
@@ -11,6 +12,13 @@ class NeuralNetwork:
         self.neurons_in_hidden_layers = neurons_in_hidden_layers
         self.b_drawn = b_drawn
         self.fitness = 0
+
+        self.most_neurons = num_inputs
+        if self.num_outputs > self.most_neurons:
+            self.most_neurons = self.num_outputs
+        for i in range(len(neurons_in_hidden_layers)):
+            if self.neurons_in_hidden_layers[i] > self.most_neurons:
+                self.most_neurons = self.neurons_in_hidden_layers[i]
 
         # ---------- Add all neurons to the network ----------
         self.network_neurons = []
@@ -32,7 +40,6 @@ class NeuralNetwork:
         layer = []
         for i in range(num_outputs):
             layer.append(Neuron(0.0, False, True, self.b_drawn))
-            layer[i].randomize()
         self.network_neurons.append(layer)
 
         # ---------- Add all connections to the network ----------
@@ -68,7 +75,7 @@ class NeuralNetwork:
         for i in range(len(self.network_neurons)):
             for j in range(len(self.network_neurons[i])):
                 self.network_neurons[i][j].draw(i, j, size, padding_x, padding_y, margin, window,
-                                                len(self.network_neurons[i]), self.num_inputs)
+                                                len(self.network_neurons[i]), self.most_neurons)
 
     def draw_connections(self, size, window):
         for i in range(len(self.network_connections)):
@@ -90,25 +97,39 @@ class NeuralNetwork:
             for j in range(len(self.network_neurons[i])):
                 rand = random.randint(0, 1)
                 if rand == 0:
-                    self.network_neurons[i][j].bias = net1.network_neurons[i][j].bias
+                    self.network_neurons[i][j].bias = copy.copy(net1.network_neurons[i][j].bias)
                 else:
-                    self.network_neurons[i][j].bias = net2.network_neurons[i][j].bias
+                    self.network_neurons[i][j].bias = copy.copy(net2.network_neurons[i][j].bias)
 
         for i in range(len(self.network_connections)):
                 rand = random.randint(0, 1)
                 if rand == 0:
-                    self.network_connections[i].weight = net1.network_connections[i].weight
+                    self.network_connections[i].weight = copy.copy(net1.network_connections[i].weight)
                 else:
-                    self.network_connections[i].weight = net2.network_connections[i].weight
+                    self.network_connections[i].weight = copy.copy(net2.network_connections[i].weight)
 
     def mutate(self, rate):
         for i in range(len(self.network_neurons)):
-            for j in range(len(self.network_neurons[i])):
-                rand = random.randint(0, rate)
-                if rand % rate == 0:
-                    self.network_neurons[i][j].randomize()
+            if i != 0 and i != len(self.network_neurons) - 1:
+                for j in range(len(self.network_neurons[i])):
+                    rand = random.randint(0, rate)
+                    if rand % rate == 0:
+                        self.network_neurons[i][j].randomize()
 
         for i in range(len(self.network_connections)):
             rand = random.randint(0, rate)
             if rand % rate == 0:
                 self.network_connections[i].randomize()
+
+    def print(self):
+        print("New Net")
+        for i in range(len(self.network_neurons)):
+            if i != 0 and i != len(self.network_neurons) - 1:
+                for j in range(len(self.network_neurons[i])):
+                    print(str(self.network_neurons[i][j].bias), end="")
+
+
+        for i in range(len(self.network_connections)):
+            print(str(self.network_connections[i].weight), end="")
+
+        print()

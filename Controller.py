@@ -8,6 +8,21 @@ def sort_net(net):
     return net.fitness
 
 
+def roulette(best_networks):
+    fitness_wheel = []
+    fitness_total = 0
+    for i in range(len(best_networks)):
+        fitness_total += best_networks[i].fitness
+        fitness_wheel.append(fitness_total)
+
+    rand = random.randint(0, fitness_total)
+    index = 0
+    while rand > fitness_wheel[index]:
+        index += 1
+
+    return index
+
+
 class Controller:
     def __init__(self, num_games, grid_size, cell_size, window, num_inputs,
                  num_hidden_layers, num_outputs, neurons_in_hidden_layers,
@@ -36,9 +51,9 @@ class Controller:
 
         self.draw_info()
         self.best_networks = []
-        self.max_best_networks = 10
-        self.num_crossovers = 50
-        self.mutation_rate = 50
+        self.max_best_networks = 50
+        self.num_crossovers = 150
+        self.mutation_rate = 10
 
         self.simulation_running = True
         self.games = []
@@ -70,12 +85,10 @@ class Controller:
 
         if b_simulation_finished:
             for i in range(self.num_games):
-                if len(self.best_networks) < self.max_best_networks:
-                    self.best_networks.append(self.games[i].snake.neural_net)
-                else:
-                    self.best_networks.sort(key = sort_net, reverse=True)
-                    if self.games[i].snake.neural_net.fitness > self.best_networks[self.max_best_networks - 1].fitness:
-                        self.best_networks[self.max_best_networks - 1] = self.games[i].snake.neural_net
+                self.best_networks.append(self.games[i].snake.neural_net)
+            self.best_networks.sort(key = sort_net, reverse=True)
+            while len(self.best_networks) > self.max_best_networks:
+                self.best_networks.__delitem__(len(self.best_networks) - 1)
 
             self.generation += 1
             for item in self.window_nn.items[:]:
@@ -102,11 +115,11 @@ class Controller:
                 elif i <= self.num_crossovers + len(self.best_networks) - 1:
                     net = NeuralNetwork(self.num_inputs, self.num_hidden_layers, self.num_outputs,
                                         self.neurons_in_hidden_layers, False)
-                    rand1 = random.randint(0, self.max_best_networks - 1)
-                    rand2 = random.randint(0, self.max_best_networks - 1)
-                    while rand2 == rand1:
-                        rand2 = random.randint(0, self.max_best_networks - 1)
-                    net.crossover(self.best_networks[rand1], self.best_networks[rand2])
+                    parent1 = roulette(self.best_networks)
+                    parent2 = roulette(self.best_networks)
+                    while parent2 != parent1:
+                        parent2 = roulette(self.best_networks)
+                    net.crossover(self.best_networks[parent1], self.best_networks[parent2])
                     net.mutate(self.mutation_rate)
                 else:
                     net = NeuralNetwork(self.num_inputs, self.num_hidden_layers, self.num_outputs,

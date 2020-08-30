@@ -4,20 +4,27 @@ from Controller import Controller
 
 def main():
     # Neural Network Configuration
-    num_inputs = 6
-    num_hidden_layers = 2
+    num_inputs = 12
+    num_hidden_layers = 1
     num_outputs = 4
-    neurons_in_hidden_layers = [5, 5]
-    num_snakes = 400
+    neurons_in_hidden_layers = [8]
+    num_snakes = 300
+
+    most_neurons = num_inputs
+    if num_outputs > most_neurons:
+        most_neurons = num_outputs
+    for i in range(len(neurons_in_hidden_layers)):
+        if neurons_in_hidden_layers[i] > most_neurons:
+            most_neurons = neurons_in_hidden_layers[i]
 
     # Neural Network Visuals Configuration
-    neuron_size = 64
-    neuron_padding_x = 160
-    neuron_padding_y = 64
-    top_padding = 128
+    neuron_size = 32
+    neuron_padding_x = 80
+    neuron_padding_y = 32
+    top_padding = 64
 
     # Performance Configuration
-    fps = 10
+    fps = 100
     performance_sum = 0
     performance_check = 30
     performance_counter = 0
@@ -26,7 +33,7 @@ def main():
 
     window_nn = GraphWin("Neural Network",
                          ((2 + num_hidden_layers) * (neuron_size + neuron_padding_x) + neuron_padding_x),
-                         ((num_inputs * (neuron_size + neuron_padding_y)) + neuron_padding_y) + top_padding,
+                         ((most_neurons * (neuron_size + neuron_padding_y)) + neuron_padding_y) + top_padding,
                          autoflush=False)
     window_nn.setBackground('black')
 
