@@ -2,6 +2,7 @@ from Game import Game
 from NeuralNetwork import NeuralNetwork
 from graphics import *
 import random
+import copy
 
 
 def sort_net(net):
@@ -51,8 +52,8 @@ class Controller:
         self.draw_info()
         self.best_networks = []
         self.max_best_networks = 50
-        self.num_crossovers = 150
-        self.mutation_rate = 10
+        self.num_crossovers = 250
+        self.mutation_rate = 40
 
         self.simulation_running = True
         self.games = []
@@ -94,14 +95,8 @@ class Controller:
             self.text.setText("Generation: " + str(self.generation))
             self.fitness_text.setText("Highest Fitness: " + str(self.best_networks[0].fitness))
             for i in range(self.num_games):
-                if i == 0:
-                    net = NeuralNetwork(self.num_inputs, self.num_hidden_layers, self.num_outputs,
-                                        self.neurons_in_hidden_layers)
-                    net.crossover(self.best_networks[0], self.best_networks[0])
-                elif i <= len(self.best_networks) - 1:
-                    net = NeuralNetwork(self.num_inputs, self.num_hidden_layers, self.num_outputs,
-                                        self.neurons_in_hidden_layers)
-                    net.crossover(self.best_networks[i], self.best_networks[i])
+                if i <= len(self.best_networks) - 1:
+                    net = copy.deepcopy(self.best_networks[i])
                 elif i <= self.num_crossovers + len(self.best_networks) - 1:
                     net = NeuralNetwork(self.num_inputs, self.num_hidden_layers, self.num_outputs,
                                         self.neurons_in_hidden_layers)

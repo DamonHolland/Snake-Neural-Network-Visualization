@@ -4,7 +4,7 @@ from Controller import Controller
 
 def main():
     # Neural Network Configuration
-    num_inputs = 12
+    num_inputs = 8
     num_hidden_layers = 1
     num_outputs = 4
     neurons_in_hidden_layers = [8]
@@ -18,13 +18,13 @@ def main():
             most_neurons = neurons_in_hidden_layers[i]
 
     # Neural Network Visuals Configuration
-    neuron_size = 32
-    neuron_padding_x = 64
-    neuron_padding_y = 32
+    neuron_size = 48
+    neuron_padding_x = 96
+    neuron_padding_y = 48
     top_padding = 64
 
     # Performance Configuration
-    fps = 10
+    target_fps = 100
     performance_sum = 0
     performance_check = 30
     performance_counter = 0
@@ -53,12 +53,12 @@ def main():
 
             # Performance Checks
             current_time = time.time()
-            sleep_time = 1.0 / fps - (current_time - last_frame_time)
+            sleep_time = 1.0 / target_fps - (current_time - last_frame_time)
             if sleep_time > 0:
                 time.sleep(sleep_time)
 
             performance_counter += 1
-            performance_sum += ((1.0 / fps) - sleep_time) / (1.0 / fps)
+            performance_sum += ((1.0 / target_fps) - sleep_time) / (1.0 / target_fps)
             if performance_counter == performance_check:
                 print("Performance: " + str(performance_sum / performance_check))
                 performance_counter = 0

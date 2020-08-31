@@ -1,5 +1,7 @@
 import random
 from graphics import *
+import copy
+import math
 
 
 class NeuralNetwork:
@@ -47,15 +49,17 @@ class NeuralNetwork:
                 for k in range(len(self.network_neuron_biases[i])):
                     output_value += node_outputs[i][k] * self.network_connection_weights[current_weight]
                     current_weight += 1
+                if i != 0 or i != range(len(self.network_neuron_biases) - 1):
+                    output_value = 1 / (1 + math.exp(-output_value))
                 layer.append(output_value)
             node_outputs.append(layer)
 
         # Find the largest output value, and return its index
-        largest_value = node_outputs[len(self.network_neuron_biases) - 1][0]
+        largest_value = node_outputs[len(node_outputs) - 1][0]
         largest_index = 0
-        for i in range(len(self.network_neuron_biases) - 1):
-            if node_outputs[len(self.network_neuron_biases) - 1][i] > largest_value:
-                largest_value = node_outputs[len(self.network_neuron_biases) - 1][0]
+        for i in range(len(node_outputs[len(node_outputs) - 1])):
+            if node_outputs[len(node_outputs) - 1][i] > largest_value:
+                largest_value = node_outputs[len(self.network_neuron_biases) - 1][i]
                 largest_index = i
 
         return largest_index
@@ -66,17 +70,17 @@ class NeuralNetwork:
             for j in range(len(self.network_neuron_biases[i])):
                 rand = random.randint(0, 1)
                 if rand == 0:
-                    self.network_neuron_biases[i][j] = net1.network_neuron_biases[i][j]
+                    self.network_neuron_biases[i][j] = copy.deepcopy(net1.network_neuron_biases[i][j])
                 else:
-                    self.network_neuron_biases[i][j] = net2.network_neuron_biases[i][j]
+                    self.network_neuron_biases[i][j] = copy.deepcopy(net2.network_neuron_biases[i][j])
 
         # Set each connection weight to the corresponding parent, each connection chosen with a random parent
         for i in range(len(self.network_connection_weights)):
                 rand = random.randint(0, 1)
                 if rand == 0:
-                    self.network_connection_weights[i] = net1.network_connection_weights[i]
+                    self.network_connection_weights[i] = copy.deepcopy(net1.network_connection_weights[i])
                 else:
-                    self.network_connection_weights[i] = net2.network_connection_weights[i]
+                    self.network_connection_weights[i] = copy.deepcopy(net2.network_connection_weights[i])
 
     def mutate(self, rate):
         # Mutate each neuron bias at a specified rate
@@ -111,11 +115,11 @@ class NeuralNetwork:
             node_outputs.append(layer)
 
         # Find the largest output value, and store its index
-        largest_value = node_outputs[len(self.network_neuron_biases) - 1][0]
+        largest_value = node_outputs[len(node_outputs) - 1][0]
         largest_index = 0
-        for i in range(len(self.network_neuron_biases) - 1):
-            if node_outputs[len(self.network_neuron_biases) - 1][i] > largest_value:
-                largest_value = node_outputs[len(self.network_neuron_biases) - 1][0]
+        for i in range(len(node_outputs[len(node_outputs) - 1])):
+            if node_outputs[len(node_outputs) - 1][i] > largest_value:
+                largest_value = node_outputs[len(self.network_neuron_biases) - 1][i]
                 largest_index = i
 
         # Create the neurons based on their output, save them so you can draw after connections (layering)
