@@ -4,9 +4,8 @@ import random
 
 
 class Snake:
-    def __init__(self, size, grid_size, window, neural_net):
+    def __init__(self, size, grid_size, neural_net):
         self.neural_net = neural_net
-        self.window = window
         self.grid_size = grid_size
         self.cell_x = random.randint(0, grid_size - 1)
         self.cell_y = random.randint(0, grid_size - 1)
@@ -16,37 +15,16 @@ class Snake:
         self.is_alive = True
         self.max_moves = 100
         self.move_count = 0
-        self.fitness = 0
-
-        if self.neural_net.b_drawn:
-            self.rect = Rectangle(Point((self.cell_x * self.size), (self.cell_y * self.size) + self.size),
-                                  Point((self.cell_x * self.size) + self.size, (self.cell_y * self.size)))
-            self.rect.setFill('green')
-            self.rect.setOutline('green')
-            self.rect.draw(window)
 
     def update(self, apple):
         self.move_count += 1
 
-        if abs(self.cell_x + self.vel[0] - apple.cell_x) < abs(self.cell_x - apple.cell_x):
-            self.fitness += 10
-        elif abs(self.cell_x + self.vel[0] - apple.cell_x) > abs(self.cell_x - apple.cell_x):
-            self.fitness -= 0
-
-        if abs(self.cell_y + self.vel[1] - apple.cell_y) < abs(self.cell_y - apple.cell_y):
-            self.fitness += 10
-        elif abs(self.cell_y + self.vel[1] - apple.cell_y) > abs(self.cell_y - apple.cell_y):
-            self.fitness -= 0
-
         self.cell_x += self.vel[0]
         self.cell_y += self.vel[1]
-        if self.neural_net.b_drawn:
-            self.rect.move(self.vel[0] * self.size, self.vel[1] * self.size)
 
         if self.cell_x == apple.cell_x and self.cell_y == apple.cell_y:
             apple.move(self)
             self.grow()
-            self.fitness += 50 * len(self.body)
             self.move_count = 0
 
         for i in range(len(self.body)):
@@ -69,8 +47,22 @@ class Snake:
 
         # Fitness Function
         if not self.is_alive:
-            self.neural_net.fitness = self.fitness
+            self.neural_net.fitness = (len(self.body) * 100) + self.move_count
 
+        output = self.neural_net.get_output(self.get_nn_input(apple))
+
+        if output == 0:
+            self.move(0, -1)
+        elif output == 1:
+            self.move(0, 1)
+        elif output == 2:
+            self.move(-1, 0)
+        elif output == 3:
+            self.move(1, 0)
+
+        return self.is_alive
+
+    def get_nn_input(self, apple):
         # Find The distances in each direction to the closest body cell
         closest_body_up = closest_body_down = closest_body_left = closest_body_right = self.grid_size
         for i in range(len(self.body)):
@@ -122,44 +114,27 @@ class Snake:
             inputs[i] = (inputs[i] - (self.grid_size / 2)) / (self.grid_size / 2)
             inputs[i] = 0 - inputs[i]
 
-        output = self.neural_net.get_output(inputs)
+        return inputs
 
-        if self.neural_net.b_drawn:
-            self.neural_net.show_firing_neurons(output)
-
-        if output == 0:
-            self.up()
-        elif output == 1:
-            self.down()
-        elif output == 2:
-            self.left()
-        elif output == 3:
-            self.right()
-
-        return self.is_alive
-
-    def up(self):
-        if len(self.body) == 0 or self.cell_y != self.body[0].cell_y + 1:
-            self.vel = [0, -1]
-
-    def down(self):
-        if len(self.body) == 0 or self.cell_y != self.body[0].cell_y - 1:
-            self.vel = [0, 1]
-
-    def left(self):
-        if len(self.body) == 0 or self.cell_x != self.body[0].cell_x + 1:
-            self.vel = [-1, 0]
-
-    def right(self):
-        if len(self.body) == 0 or self.cell_x != self.body[0].cell_x - 1:
-            self.vel = [1, 0]
+    def move(self, dx, dy):
+        if len(self.body) == 0 or (self.cell_x + dx != self.body[0].cell_x and self.cell_y + dy != self.body[0].cell_y):
+            self.vel = [dx, dy]
 
     def grow(self):
         if len(self.body) == 0:
-            new_body = Body(self.cell_x - self.vel[0], self.cell_y - self.vel[1], self.size, self.window,
-                            self.neural_net.b_drawn)
+            new_body = Body(self.cell_x - self.vel[0], self.cell_y - self.vel[1], self.size)
         else:
             new_body = Body(self.body[len(self.body) - 1].cell_x,
                             self.body[len(self.body) - 1].cell_y,
-                            self.size, self.window, self.neural_net.b_drawn)
+                            self.size)
         self.body.append(new_body)
+
+    def draw(self, window):
+        rect = Rectangle(Point((self.cell_x * self.size), (self.cell_y * self.size) + self.size),
+                              Point((self.cell_x * self.size) + self.size, (self.cell_y * self.size)))
+        rect.setFill('green')
+        rect.setOutline('green')
+        rect.draw(window)
+
+        for i in range(len(self.body)):
+            self.body[i].draw(window)

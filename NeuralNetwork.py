@@ -1,135 +1,161 @@
-from Neuron import Neuron
-from Connection import Connection
 import random
-import copy
+from graphics import *
 
 
 class NeuralNetwork:
-    def __init__(self, num_inputs, num_hidden_layers, num_outputs, neurons_in_hidden_layers, b_drawn):
-        self.num_inputs = num_inputs
-        self.num_hidden_layers = num_hidden_layers
-        self.num_outputs = num_outputs
-        self.neurons_in_hidden_layers = neurons_in_hidden_layers
-        self.b_drawn = b_drawn
+    def __init__(self, num_inputs, num_hidden_layers, num_outputs, neurons_in_hidden_layers):
         self.fitness = 0
 
-        self.most_neurons = num_inputs
-        if self.num_outputs > self.most_neurons:
-            self.most_neurons = self.num_outputs
-        for i in range(len(neurons_in_hidden_layers)):
-            if self.neurons_in_hidden_layers[i] > self.most_neurons:
-                self.most_neurons = self.neurons_in_hidden_layers[i]
-
-        # ---------- Add all neurons to the network ----------
-        self.network_neurons = []
+        # ---------- Add all neuron biases to the network ----------
+        self.network_neuron_biases = []
         layer = []
-        # Add input layers to network
+        # Add input biases to network (0)
         for i in range(num_inputs):
-            layer.append(Neuron(0.0, False, False, self.b_drawn))
-        self.network_neurons.append(layer)
+            layer.append(0)
+        self.network_neuron_biases.append(layer)
 
-        # Add hidden layers to network
+        # Add hidden layer biases to network (Random)
         for i in range(num_hidden_layers):
             layer = []
             for j in range(neurons_in_hidden_layers[i]):
-                layer.append(Neuron(0.0, True, False, self.b_drawn))
-                layer[j].randomize()
-            self.network_neurons.append(layer)
+                layer.append(random.randint(-100, 100) / 100.0)
+            self.network_neuron_biases.append(layer)
 
-        # Add output layers to network
+        # Add output layer biases to network (0)
         layer = []
         for i in range(num_outputs):
-            layer.append(Neuron(0.0, False, True, self.b_drawn))
-        self.network_neurons.append(layer)
+            layer.append(0)
+        self.network_neuron_biases.append(layer)
 
-        # ---------- Add all connections to the network ----------
-        self.network_connections = []
-        for i in range(len(self.network_neurons) - 1):
-            for j in range(len(self.network_neurons[i])):
-                for k in range(len(self.network_neurons[i + 1])):
-                    self.network_connections.append(Connection(self.network_neurons[i][j],
-                                                               self.network_neurons[i + 1][k]))
+        # ---------- Add all connection weights to the network (Random)----------
+        self.network_connection_weights = []
+        for i in range(len(self.network_neuron_biases) - 1):
+            for j in range(len(self.network_neuron_biases[i])):
+                for k in range(len(self.network_neuron_biases[i + 1])):
+                    self.network_connection_weights.append(random.randint(-100, 100) / 100.0)
 
     def get_output(self, inputs):
         # Set the input neuron values according to given input
-        for i in range(self.num_inputs):
-            self.network_neurons[0][i].stored_value = inputs[i]
+        node_outputs = [inputs]
 
         # Set the stored values of each Neuron by layer
-        for i in range(len(self.network_connections)):
-            self.network_connections[i].neuron2.stored_value = 0
-            self.network_connections[i].neuron2.stored_value += self.network_connections[i].neuron1.get_output() * \
-                                                                self.network_connections[i].weight
+        current_weight = 0
+        for i in range(len(self.network_neuron_biases) - 1):
+            layer = []
+            for j in range(len(self.network_neuron_biases[i + 1])):
+                output_value = self.network_neuron_biases[i + 1][j]
+                for k in range(len(self.network_neuron_biases[i])):
+                    output_value += node_outputs[i][k] * self.network_connection_weights[current_weight]
+                    current_weight += 1
+                layer.append(output_value)
+            node_outputs.append(layer)
 
         # Find the largest output value, and return its index
-        largest_value = self.network_neurons[len(self.network_neurons) - 1][0].get_output()
+        largest_value = node_outputs[len(self.network_neuron_biases) - 1][0]
         largest_index = 0
-        for i in range(len(self.network_neurons[len(self.network_neurons) - 1])):
-            if self.network_neurons[len(self.network_neurons) - 1][i].get_output() > largest_value:
-                largest_value = self.network_neurons[len(self.network_neurons) - 1][i].get_output()
+        for i in range(len(self.network_neuron_biases) - 1):
+            if node_outputs[len(self.network_neuron_biases) - 1][i] > largest_value:
+                largest_value = node_outputs[len(self.network_neuron_biases) - 1][0]
                 largest_index = i
 
         return largest_index
 
-    def draw_neurons(self, size, padding_x, padding_y, margin, window):
-        for i in range(len(self.network_neurons)):
-            for j in range(len(self.network_neurons[i])):
-                self.network_neurons[i][j].draw(i, j, size, padding_x, padding_y, margin, window,
-                                                len(self.network_neurons[i]), self.most_neurons)
-
-    def draw_connections(self, size, window):
-        for i in range(len(self.network_connections)):
-            self.network_connections[i].draw(size, window)
-
-    def show_firing_neurons(self, firing_neuron):
-        for i in range(len(self.network_neurons[len(self.network_neurons) - 1])):
-            if i == firing_neuron:
-                self.network_neurons[len(self.network_neurons) - 1][i].look_fire()
-            else:
-                self.network_neurons[len(self.network_neurons) - 1][i].look_dormant()
-
-    def update_look(self):
-        for i in range(len(self.network_connections)):
-            self.network_connections[i].update_look()
-
     def crossover(self, net1, net2):
-        for i in range(len(self.network_neurons)):
-            for j in range(len(self.network_neurons[i])):
+        # Set each node bias to the corresponding parent, each bias chosen with a random parent
+        for i in range(len(self.network_neuron_biases)):
+            for j in range(len(self.network_neuron_biases[i])):
                 rand = random.randint(0, 1)
                 if rand == 0:
-                    self.network_neurons[i][j].bias = copy.copy(net1.network_neurons[i][j].bias)
+                    self.network_neuron_biases[i][j] = net1.network_neuron_biases[i][j]
                 else:
-                    self.network_neurons[i][j].bias = copy.copy(net2.network_neurons[i][j].bias)
+                    self.network_neuron_biases[i][j] = net2.network_neuron_biases[i][j]
 
-        for i in range(len(self.network_connections)):
+        # Set each connection weight to the corresponding parent, each connection chosen with a random parent
+        for i in range(len(self.network_connection_weights)):
                 rand = random.randint(0, 1)
                 if rand == 0:
-                    self.network_connections[i].weight = copy.copy(net1.network_connections[i].weight)
+                    self.network_connection_weights[i] = net1.network_connection_weights[i]
                 else:
-                    self.network_connections[i].weight = copy.copy(net2.network_connections[i].weight)
+                    self.network_connection_weights[i] = net2.network_connection_weights[i]
 
     def mutate(self, rate):
-        for i in range(len(self.network_neurons)):
-            if i != 0 and i != len(self.network_neurons) - 1:
-                for j in range(len(self.network_neurons[i])):
+        # Mutate each neuron bias at a specified rate
+        for i in range(len(self.network_neuron_biases)):
+            if i != 0 and i != len(self.network_neuron_biases) - 1:
+                for j in range(len(self.network_neuron_biases[i])):
                     rand = random.randint(0, rate)
                     if rand % rate == 0:
-                        self.network_neurons[i][j].randomize()
+                        self.network_neuron_biases[i][j] = random.randint(-100, 100) / 100.0
 
-        for i in range(len(self.network_connections)):
-            rand = random.randint(0, rate)
-            if rand % rate == 0:
-                self.network_connections[i].randomize()
+        # Mutate each neuron bias at a specified rate
+        for i in range(len(self.network_connection_weights)):
+            if i != 0 and i != len(self.network_connection_weights) - 1:
+                    rand = random.randint(0, rate)
+                    if rand % rate == 0:
+                        self.network_connection_weights[i] = random.randint(-100, 100) / 100.0
 
-    def print(self):
-        print("New Net")
-        for i in range(len(self.network_neurons)):
-            if i != 0 and i != len(self.network_neurons) - 1:
-                for j in range(len(self.network_neurons[i])):
-                    print(str(self.network_neurons[i][j].bias), end="")
+    def draw(self, window, inputs, neuron_size, neuron_padding_x, neuron_padding_y, top_padding, most_neurons):
+        # First, get an array of outputs that will be used to show neurons
+        node_outputs = [inputs]
 
+        # Set the stored values of each Neuron by layer
+        current_weight = 0
+        for i in range(len(self.network_neuron_biases) - 1):
+            layer = []
+            for j in range(len(self.network_neuron_biases[i + 1])):
+                output_value = self.network_neuron_biases[i + 1][j]
+                for k in range(len(self.network_neuron_biases[i])):
+                    output_value += node_outputs[i][k] * self.network_connection_weights[current_weight]
+                    current_weight += 1
+                layer.append(output_value)
+            node_outputs.append(layer)
 
-        for i in range(len(self.network_connections)):
-            print(str(self.network_connections[i].weight), end="")
+        # Find the largest output value, and store its index
+        largest_value = node_outputs[len(self.network_neuron_biases) - 1][0]
+        largest_index = 0
+        for i in range(len(self.network_neuron_biases) - 1):
+            if node_outputs[len(self.network_neuron_biases) - 1][i] > largest_value:
+                largest_value = node_outputs[len(self.network_neuron_biases) - 1][0]
+                largest_index = i
 
-        print()
+        # Create the neurons based on their output, save them so you can draw after connections (layering)
+        neurons_positions = []
+        saved_neurons = []
+        for i in range(len(node_outputs)):
+            neuron_pos_layer = []
+            for j in range(len(node_outputs[i])):
+                mid_x = i * (neuron_size + neuron_padding_x) + (neuron_padding_x / 2) + neuron_size
+                mid_y = j * (neuron_size + neuron_padding_y) + (neuron_padding_y / 2) + top_padding + neuron_size +\
+                        ((most_neurons - len(node_outputs[i])) /  2) * (neuron_size + neuron_padding_y)
+                neuron_pos_layer.append([mid_x, mid_y])
+                neuron = Circle(Point(mid_x, mid_y), neuron_size / 2)
+                if i != len(node_outputs) - 1:
+                    if node_outputs[i][j] >= 0.5:
+                        neuron.setFill('blue')
+                    else:
+                        neuron.setFill('white')
+                else:
+                    if j == largest_index:
+                        neuron.setFill('blue')
+                    else:
+                        neuron.setFill('white')
+                saved_neurons.append(neuron)
+            neurons_positions.append(neuron_pos_layer)
+
+        # Now draw connections between neurons based on their weights
+        current_weight = 0
+        for i in range(len(neurons_positions) - 1):
+            for j in range(len(neurons_positions[i])):
+                for k in range(len(neurons_positions[i + 1])):
+                    connection = Line(Point(neurons_positions[i][j][0], neurons_positions[i][j][1]),
+                                      Point(neurons_positions[i + 1][k][0], neurons_positions[i + 1][k][1]))
+                    if self.network_connection_weights[current_weight] >= 0:
+                        connection.setFill('blue')
+                    else:
+                        connection.setFill('red')
+                    connection.draw(window)
+                    current_weight += 1
+
+        # Now draw the neurons on top of connections
+        for i in range(len(saved_neurons)):
+            saved_neurons[i].draw(window)

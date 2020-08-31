@@ -8,7 +8,7 @@ def main():
     num_hidden_layers = 1
     num_outputs = 4
     neurons_in_hidden_layers = [8]
-    num_snakes = 300
+    num_snakes = 500
 
     most_neurons = num_inputs
     if num_outputs > most_neurons:
@@ -19,12 +19,12 @@ def main():
 
     # Neural Network Visuals Configuration
     neuron_size = 32
-    neuron_padding_x = 80
+    neuron_padding_x = 64
     neuron_padding_y = 32
     top_padding = 64
 
     # Performance Configuration
-    fps = 100
+    fps = 10
     performance_sum = 0
     performance_check = 30
     performance_counter = 0
@@ -37,13 +37,13 @@ def main():
                          autoflush=False)
     window_nn.setBackground('black')
 
-    window = GraphWin("Snake", grid_size * cell_size, grid_size * cell_size)
+    window = GraphWin("Snake", grid_size * cell_size, grid_size * cell_size, autoflush=False)
     window.setBackground('black')
 
     while window.isOpen() and window_nn.isOpen():
         controller = Controller(num_snakes, grid_size, cell_size, window, num_inputs, num_hidden_layers, num_outputs,
                                 neurons_in_hidden_layers, neuron_size, neuron_padding_x, neuron_padding_y,
-                                top_padding, window_nn)
+                                top_padding, most_neurons, window_nn)
 
         while controller.simulation_running:
             last_frame_time = time.time()
