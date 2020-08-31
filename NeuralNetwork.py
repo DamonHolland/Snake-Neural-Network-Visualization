@@ -111,6 +111,8 @@ class NeuralNetwork:
                 for k in range(len(self.network_neuron_biases[i])):
                     output_value += node_outputs[i][k] * self.network_connection_weights[current_weight]
                     current_weight += 1
+                if i != 0 or i != range(len(self.network_neuron_biases) - 1):
+                    output_value = 1 / (1 + math.exp(-output_value))
                 layer.append(output_value)
             node_outputs.append(layer)
 

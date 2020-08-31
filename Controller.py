@@ -52,8 +52,8 @@ class Controller:
         self.draw_info()
         self.best_networks = []
         self.max_best_networks = 50
-        self.num_crossovers = 250
-        self.mutation_rate = 40
+        self.num_crossovers = 350
+        self.mutation_rate = 20
 
         self.simulation_running = True
         self.games = []
@@ -68,9 +68,9 @@ class Controller:
         b_simulation_finished = False
         for i in range(self.num_games):
             if self.games[i].is_running:
-                self.games[i].update()
                 if i == 0:
                     self.draw()
+                self.games[i].update()
 
 
         if not self.games[0].is_running:
