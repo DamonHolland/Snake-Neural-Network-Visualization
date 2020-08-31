@@ -5,10 +5,10 @@ from Controller import Controller
 def main():
     # Neural Network Configuration
     num_inputs = 8
-    num_hidden_layers = 1
+    num_hidden_layers = 2
     num_outputs = 4
-    neurons_in_hidden_layers = [8]
-    num_snakes = 500
+    neurons_in_hidden_layers = [8, 6]
+    num_snakes = 400
 
     most_neurons = num_inputs
     if num_outputs > most_neurons:

@@ -19,7 +19,12 @@ class Snake:
 
     def update(self, apple):
         self.move_count += 1
-        self.fitness += 0
+        self.fitness -= 2
+
+        if abs(self.cell_x + self.vel[0] - apple.cell_x) < abs(self.cell_x - apple.cell_x):
+            self.fitness += 2
+        if abs(self.cell_y + self.vel[1] - apple.cell_y) < abs(self.cell_y - apple.cell_y):
+            self.fitness += 2
 
         self.cell_x += self.vel[0]
         self.cell_y += self.vel[1]
@@ -28,13 +33,13 @@ class Snake:
             apple.move(self)
             self.grow()
             self.move_count = 0
-            self.fitness += 300
+            self.fitness += len(self.body) * 100
 
         for i in range(len(self.body)):
             self.body[i].update()
             if self.cell_x == self.body[i].cell_x and self.cell_y == self.body[i].cell_y:
                 self.is_alive = False
-                self.fitness -= 0
+                self.fitness -= 800
             if i == 0:
                 self.body[i].vel = [self.cell_x - self.body[i].cell_x, self.cell_y - self.body[i].cell_y]
             else:
@@ -43,17 +48,17 @@ class Snake:
 
         if self.cell_x < 0 or self.cell_x >= self.grid_size or self.cell_y < 0 or self.cell_y >= self.grid_size:
             self.is_alive = False
-            self.fitness -= 0
+            self.fitness -= 800
 
         if self.move_count > self.max_moves:
             self.is_alive = False
-            self.fitness -= 0
+            self.fitness -= 500
 
         # --------------- Neural Network ---------------
 
         # Fitness Function
         if not self.is_alive:
-            self.neural_net.fitness = self.fitness
+            self.neural_net.fitness = 1000 + self.fitness
 
         output = self.neural_net.get_output(self.get_nn_input(apple))
 
@@ -93,6 +98,15 @@ class Snake:
         closest_wall_left = self.cell_x
         closest_wall_right = self.grid_size - self.cell_x
 
+        if closest_body_up == self.grid_size:
+            closest_body_up = closest_wall_up
+        if closest_body_down == self.grid_size:
+            closest_body_down = closest_wall_down
+        if closest_body_left == self.grid_size:
+            closest_body_left = closest_wall_left
+        if closest_body_right == self.grid_size:
+            closest_body_right = closest_wall_right
+
         # Find differences in each axis to the apple
         if self.cell_y > apple.cell_y:
             apple_diff_up = self.cell_y - apple.cell_y
@@ -109,7 +123,7 @@ class Snake:
 
 
         # Normalize inputs
-        inputs = [closest_wall_up, closest_wall_down, closest_wall_left, closest_wall_right,
+        inputs = [closest_body_up, closest_body_down, closest_body_left, closest_body_right,
                   apple_diff_up, apple_diff_down, apple_diff_left, apple_diff_right]
 
         for i in range(len(inputs)):

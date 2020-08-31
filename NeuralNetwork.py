@@ -136,10 +136,8 @@ class NeuralNetwork:
                 neuron_pos_layer.append([mid_x, mid_y])
                 neuron = Circle(Point(mid_x, mid_y), neuron_size / 2)
                 if i != len(node_outputs) - 1:
-                    if node_outputs[i][j] >= 0.5:
-                        neuron.setFill('blue')
-                    else:
-                        neuron.setFill('white')
+                    rgb_blue = int((node_outputs[i][j] * 127.5) + 127.5)
+                    neuron.setFill(color_rgb(255 - rgb_blue, 255 - rgb_blue, 255))
                 else:
                     if j == largest_index:
                         neuron.setFill('blue')
