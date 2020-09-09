@@ -70,17 +70,17 @@ class NeuralNetwork:
             for j in range(len(self.network_neuron_biases[i])):
                 rand = random.randint(0, 1)
                 if rand == 0:
-                    self.network_neuron_biases[i][j] = copy.deepcopy(net1.network_neuron_biases[i][j])
+                    self.network_neuron_biases[i][j] = net1.network_neuron_biases[i][j]
                 else:
-                    self.network_neuron_biases[i][j] = copy.deepcopy(net2.network_neuron_biases[i][j])
+                    self.network_neuron_biases[i][j] = net2.network_neuron_biases[i][j]
 
         # Set each connection weight to the corresponding parent, each connection chosen with a random parent
         for i in range(len(self.network_connection_weights)):
                 rand = random.randint(0, 1)
                 if rand == 0:
-                    self.network_connection_weights[i] = copy.deepcopy(net1.network_connection_weights[i])
+                    self.network_connection_weights[i] = net1.network_connection_weights[i]
                 else:
-                    self.network_connection_weights[i] = copy.deepcopy(net2.network_connection_weights[i])
+                    self.network_connection_weights[i] = net2.network_connection_weights[i]
 
     def mutate(self, rate):
         # Mutate each neuron bias at a specified rate
@@ -151,8 +151,9 @@ class NeuralNetwork:
         for i in range(len(neurons_positions) - 1):
             for j in range(len(neurons_positions[i])):
                 for k in range(len(neurons_positions[i + 1])):
-                    connection = Line(Point(neurons_positions[i][j][0], neurons_positions[i][j][1]),
-                                      Point(neurons_positions[i + 1][k][0], neurons_positions[i + 1][k][1]))
+                    connection = Line(Point(neurons_positions[i][j][0] + neuron_size / 2, neurons_positions[i][j][1]),
+                                      Point(neurons_positions[i + 1][k][0] - neuron_size / 2,
+                                            neurons_positions[i + 1][k][1]))
                     if self.network_connection_weights[current_weight] >= 0:
                         connection.setFill('blue')
                     else:

@@ -5,10 +5,9 @@ from Controller import Controller
 def main():
     # Neural Network Configuration
     num_inputs = 8
-    num_hidden_layers = 2
+    neurons_in_hidden_layers = [8]
     num_outputs = 4
-    neurons_in_hidden_layers = [8, 6]
-    num_snakes = 400
+    num_snakes = 500
 
     most_neurons = num_inputs
     if num_outputs > most_neurons:
@@ -17,6 +16,11 @@ def main():
         if neurons_in_hidden_layers[i] > most_neurons:
             most_neurons = neurons_in_hidden_layers[i]
 
+    # Genetic Algorithm Configuration
+    num_best_snakes = 20
+    num_crossovers = 250
+    mutation_rate = 100
+
     # Neural Network Visuals Configuration
     neuron_size = 48
     neuron_padding_x = 96
@@ -24,15 +28,17 @@ def main():
     top_padding = 64
 
     # Performance Configuration
-    target_fps = 50
+    target_fps = 100
     performance_sum = 0
     performance_check = 30
     performance_counter = 0
-    grid_size = 24
+
+    # Grid configuration
+    grid_size = 15
     cell_size = 32
 
     window_nn = GraphWin("Neural Network",
-                         ((2 + num_hidden_layers) * (neuron_size + neuron_padding_x) + neuron_padding_x),
+                         ((2 + len(neurons_in_hidden_layers)) * (neuron_size + neuron_padding_x) + neuron_padding_x),
                          ((most_neurons * (neuron_size + neuron_padding_y)) + neuron_padding_y) + top_padding,
                          autoflush=False)
     window_nn.setBackground('black')
@@ -41,9 +47,9 @@ def main():
     window.setBackground('black')
 
     while window.isOpen() and window_nn.isOpen():
-        controller = Controller(num_snakes, grid_size, cell_size, window, num_inputs, num_hidden_layers, num_outputs,
-                                neurons_in_hidden_layers, neuron_size, neuron_padding_x, neuron_padding_y,
-                                top_padding, most_neurons, window_nn)
+        controller = Controller(num_snakes, grid_size, cell_size, window, num_inputs, len(neurons_in_hidden_layers),
+                                num_outputs, neurons_in_hidden_layers, neuron_size, neuron_padding_x, neuron_padding_y,
+                                top_padding, most_neurons, window_nn, num_best_snakes, num_crossovers, mutation_rate)
 
         while controller.simulation_running:
             last_frame_time = time.time()

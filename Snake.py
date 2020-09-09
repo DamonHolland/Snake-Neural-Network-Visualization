@@ -15,16 +15,11 @@ class Snake:
         self.is_alive = True
         self.max_moves = 100
         self.move_count = 0
-        self.fitness = 0
+        self.total_moves = 0
 
     def update(self, apple):
         self.move_count += 1
-        self.fitness -= 2
-
-        if abs(self.cell_x + self.vel[0] - apple.cell_x) < abs(self.cell_x - apple.cell_x):
-            self.fitness += 2
-        if abs(self.cell_y + self.vel[1] - apple.cell_y) < abs(self.cell_y - apple.cell_y):
-            self.fitness += 2
+        self.total_moves += 1
 
         self.cell_x += self.vel[0]
         self.cell_y += self.vel[1]
@@ -33,13 +28,11 @@ class Snake:
             apple.move(self)
             self.grow()
             self.move_count = 0
-            self.fitness += len(self.body) * 100
 
         for i in range(len(self.body)):
             self.body[i].update()
             if self.cell_x == self.body[i].cell_x and self.cell_y == self.body[i].cell_y:
                 self.is_alive = False
-                self.fitness -= 800
             if i == 0:
                 self.body[i].vel = [self.cell_x - self.body[i].cell_x, self.cell_y - self.body[i].cell_y]
             else:
@@ -48,17 +41,16 @@ class Snake:
 
         if self.cell_x < 0 or self.cell_x >= self.grid_size or self.cell_y < 0 or self.cell_y >= self.grid_size:
             self.is_alive = False
-            self.fitness -= 800
 
         if self.move_count > self.max_moves:
             self.is_alive = False
-            self.fitness -= 500
 
         # --------------- Neural Network ---------------
 
         # Fitness Function
         if not self.is_alive:
-            self.neural_net.fitness = 1000 + self.fitness
+            self.neural_net.fitness = int (self.total_moves + ((len(self.body) * len(self.body)) * 5) -
+                                           (0.35 * (self.total_moves ** 1.2)))
 
         output = self.neural_net.get_output(self.get_nn_input(apple))
 
@@ -74,61 +66,54 @@ class Snake:
         return self.is_alive
 
     def get_nn_input(self, apple):
-        # Find The distances in each direction to the closest body cell
-        closest_body_up = closest_body_down = closest_body_left = closest_body_right = self.grid_size
+        # Find if there is a body cell in each direction
+        is_cell_up = is_cell_down = is_cell_left = is_cell_right = 0
         for i in range(len(self.body)):
             if self.cell_x == self.body[i].cell_x:
-                if self.cell_y < self.body[i].cell_y:
-                    if self.body[i].cell_y - self.cell_y < closest_body_down:
-                        closest_body_down = self.body[i].cell_y - self.cell_y
-                else:
-                    if self.cell_y - self.body[i].cell_y < closest_body_up:
-                        closest_body_up = self.cell_y - self.body[i].cell_y
+                if self.cell_y - 1 == self.body[i].cell_y:
+                    is_cell_up = 1
+                elif self.cell_y + 1 == self.body[i].cell_y:
+                    is_cell_down = 1
             elif self.cell_y == self.body[i].cell_y:
-                if self.cell_x > self.body[i].cell_x:
-                    if self.cell_x - self.body[i].cell_x < closest_body_left:
-                        closest_body_left = self.cell_x - self.body[i].cell_x
-                else:
-                    if self.body[i].cell_x - self.cell_x < closest_body_right:
-                        closest_body_right = self.body[i].cell_x - self.cell_x
-
-        # Find distances in each direction to the wall
-        closest_wall_up = self.cell_y
-        closest_wall_down = self.grid_size - self.cell_y
-        closest_wall_left = self.cell_x
-        closest_wall_right = self.grid_size - self.cell_x
-
-        if closest_body_up == self.grid_size:
-            closest_body_up = closest_wall_up
-        if closest_body_down == self.grid_size:
-            closest_body_down = closest_wall_down
-        if closest_body_left == self.grid_size:
-            closest_body_left = closest_wall_left
-        if closest_body_right == self.grid_size:
-            closest_body_right = closest_wall_right
+                if self.cell_x - 1 == self.body[i].cell_x:
+                    is_cell_left = 1
+                elif self.cell_x + 1 == self.body[i].cell_x:
+                    is_cell_right = 1
+        # Find if there is a wall in each direction
+        if self.cell_y - 1 < 0:
+            is_cell_up = 1
+        if self.cell_y + 1 >= self.grid_size:
+            is_cell_down = 1
+        if self.cell_x - 1 < 0:
+            is_cell_left = 1
+        if self.cell_x + 1 >= self.grid_size:
+            is_cell_right = 1
 
         # Find differences in each axis to the apple
+        is_apple_up = is_apple_down = is_apple_left = is_apple_right = 0
         if self.cell_y > apple.cell_y:
-            apple_diff_up = self.cell_y - apple.cell_y
-            apple_diff_down = self.grid_size - self.cell_y
-        else:
-            apple_diff_down = apple.cell_y - self.cell_y
-            apple_diff_up = self.cell_y
+            is_apple_up = 1
+        elif self.cell_y < apple.cell_y:
+            is_apple_down = 1
         if self.cell_x > apple.cell_x:
-            apple_diff_left = self.cell_x - apple.cell_x
-            apple_diff_right = self.grid_size - self.cell_x
-        else:
-            apple_diff_right = apple.cell_x - self.cell_x
-            apple_diff_left = self.cell_x
+            is_apple_left = 1
+        elif self.cell_x < apple.cell_x:
+            is_apple_right = 1
+
+        #Normalize inputs
+        is_cell_up = is_cell_up * 2 - 1
+        is_cell_down = is_cell_down * 2 - 1
+        is_cell_left = is_cell_left * 2 - 1
+        is_cell_right = is_cell_right * 2 - 1
+        is_apple_up = is_apple_up * 2 - 1
+        is_apple_down = is_apple_down * 2 - 1
+        is_apple_left = is_apple_left * 2 - 1
+        is_apple_right = is_apple_right * 2 - 1
 
 
-        # Normalize inputs
-        inputs = [closest_body_up, closest_body_down, closest_body_left, closest_body_right,
-                  apple_diff_up, apple_diff_down, apple_diff_left, apple_diff_right]
-
-        for i in range(len(inputs)):
-            inputs[i] = (inputs[i] - (self.grid_size / 2)) / (self.grid_size / 2)
-            inputs[i] = 0 - inputs[i]
+        #Fill input array with previously calculated values
+        inputs = [is_cell_up, is_cell_down, is_cell_left, is_cell_right,
+                  is_apple_up, is_apple_down, is_apple_left, is_apple_right]
 
         return inputs
 

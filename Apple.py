@@ -3,11 +3,12 @@ from graphics import *
 
 
 class Apple:
-    def __init__(self, grid_size, cell_size):
+    def __init__(self, grid_size, cell_size, snake):
         self.grid_size = grid_size
         self.size = cell_size
-        self.cell_x = random.randint(0, grid_size - 1)
-        self.cell_y = random.randint(0, grid_size - 1)
+        self.cell_x = 0
+        self.cell_y = 0
+        self.move(snake)
 
     def move(self, snake):
         position_found = False

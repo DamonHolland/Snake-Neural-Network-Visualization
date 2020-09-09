@@ -25,7 +25,8 @@ def roulette(best_networks):
 class Controller:
     def __init__(self, num_games, grid_size, cell_size, window, num_inputs,
                  num_hidden_layers, num_outputs, neurons_in_hidden_layers,
-                 neuron_size, neuron_padding_x, neuron_padding_y, top_padding, most_neurons, window_nn):
+                 neuron_size, neuron_padding_x, neuron_padding_y, top_padding, most_neurons, window_nn,
+                 max_best_networks, num_crossovers, mutation_rate):
         self.num_games = num_games
         self.grid_size = grid_size
         self.cell_size = cell_size
@@ -51,9 +52,9 @@ class Controller:
 
         self.draw_info()
         self.best_networks = []
-        self.max_best_networks = 50
-        self.num_crossovers = 350
-        self.mutation_rate = 20
+        self.max_best_networks = max_best_networks
+        self.num_crossovers = num_crossovers
+        self.mutation_rate = mutation_rate
 
         self.simulation_running = True
         self.games = []
@@ -97,6 +98,7 @@ class Controller:
             for i in range(self.num_games):
                 if i <= len(self.best_networks) - 1:
                     net = copy.deepcopy(self.best_networks[i])
+                    net.fitness = 0
                 elif i <= self.num_crossovers + len(self.best_networks) - 1:
                     net = NeuralNetwork(self.num_inputs, self.num_hidden_layers, self.num_outputs,
                                         self.neurons_in_hidden_layers)
