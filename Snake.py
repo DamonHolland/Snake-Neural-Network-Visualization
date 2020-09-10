@@ -25,8 +25,8 @@ class Snake:
         self.cell_y += self.vel[1]
 
         if self.cell_x == apple.cell_x and self.cell_y == apple.cell_y:
-            apple.move(self)
             self.grow()
+            apple.move(self)
             self.move_count = 0
 
         for i in range(len(self.body)):

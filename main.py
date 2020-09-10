@@ -17,9 +17,9 @@ def main():
             most_neurons = neurons_in_hidden_layers[i]
 
     # Genetic Algorithm Configuration
-    num_best_snakes = 20
+    num_best_snakes = 50
     num_crossovers = 250
-    mutation_rate = 100
+    mutation_rate = 50
 
     # Neural Network Visuals Configuration
     neuron_size = 48
@@ -28,7 +28,7 @@ def main():
     top_padding = 64
 
     # Performance Configuration
-    target_fps = 100
+    target_fps = 10
     performance_sum = 0
     performance_check = 30
     performance_counter = 0

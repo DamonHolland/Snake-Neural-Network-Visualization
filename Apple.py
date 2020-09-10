@@ -11,23 +11,20 @@ class Apple:
         self.move(snake)
 
     def move(self, snake):
-        position_found = False
-        new_x = new_y = 0
-        while not position_found:
-            position_taken = False
-            new_x = random.randint(0, self.grid_size - 1)
-            new_y = random.randint(0, self.grid_size - 1)
-            if new_x == snake.cell_x and new_y == snake.cell_y:
-                position_taken = True
-            else:
-                if len(snake.body) != 0:
-                    for cell in snake.body[:]:
-                        if new_x == cell.cell_x and new_y == cell.cell_y:
-                            position_taken = True
-            if not position_taken:
-                position_found = True
-        self.cell_x = new_x
-        self.cell_y = new_y
+        position_taken = False
+        new_x = random.randint(0, self.grid_size - 1)
+        new_y = random.randint(0, self.grid_size - 1)
+        if new_x == snake.cell_x and new_y == snake.cell_y:
+            position_taken = True
+        else:
+            for i in range(len(snake.body)):
+                if new_x == snake.body[i].cell_x and new_y == snake.body[i].cell_y:
+                    position_taken = True
+        if position_taken:
+            self.move(snake)
+        else:
+            self.cell_x = new_x
+            self.cell_y = new_y
 
     def draw(self, window):
         circle = Circle(Point((self.cell_x * self.size) + self.size / 2,
