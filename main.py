@@ -64,9 +64,10 @@ def main():
                 time.sleep(sleep_time)
 
             performance_counter += 1
-            performance_sum += ((1.0 / target_fps) - sleep_time) / (1.0 / target_fps)
+            current_time = time.time()
+            performance_sum += 1.0 / (current_time - last_frame_time)
             if performance_counter == performance_check:
-                print("Performance: " + str(performance_sum / performance_check))
+                print("Average FPS: " + str(performance_sum / performance_check) + " | Target FPS: " + str(target_fps))
                 performance_counter = 0
                 performance_sum = 0
 
