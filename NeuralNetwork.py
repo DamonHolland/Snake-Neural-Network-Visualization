@@ -55,14 +55,7 @@ class NeuralNetwork:
             node_outputs.append(layer)
 
         # Find the largest output value, and return its index
-        largest_value = node_outputs[len(node_outputs) - 1][0]
-        largest_index = 0
-        for i in range(len(node_outputs[len(node_outputs) - 1])):
-            if node_outputs[len(node_outputs) - 1][i] > largest_value:
-                largest_value = node_outputs[len(self.network_neuron_biases) - 1][i]
-                largest_index = i
-
-        return largest_index
+        return node_outputs[len(node_outputs) - 1].index(max(node_outputs[len(node_outputs) - 1]))
 
     def crossover(self, net1, net2):
         # Set each node bias to the corresponding parent, each bias chosen with a random parent
