@@ -28,7 +28,7 @@ def main():
     top_padding = 64
 
     # Performance Configuration
-    target_fps = 10
+    target_fps = 30
     performance_sum = 0
     performance_check = 30
     performance_counter = 0
